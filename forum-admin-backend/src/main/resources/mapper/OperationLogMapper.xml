@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fengxi.forumadmin.mapper.OperationLogMapper">
+    <resultMap id="OperationLog" type="com.fengxi.forumadmin.model.entity.OperationLog">
+        <id column="id" property="id"/>
+        <result column="module" property="OperModule"/>
+        <result column="type" property="OperType"/>
+        <result column="des" property="OperDesc"/>
+        <result column="method" property="OperMethod"/>
+        <result column="ip" property="OperIp"/>
+        <result column="requ_param" property="OperRequParam"/>
+        <result column="resp_param" property="OperRespParam"/>
+        <result column="user_id" property="OperUserId"/>
+        <result column="user_name" property="OperUserName"/>
+        <result column="url" property="OperUrl"/>
+        <result column="create_time" property="OperCreateTime"/>
+        <result column="ver" property="OperVer"/>
+    </resultMap>
+
+    <select id="selectListAndPage" resultMap="OperationLog">
+        SELECT *
+        FROM oper_log t
+        <where>
+            <if test="tab == 'hot'">
+                date(t.create_time) &lt;= date_add(curdate(), interval 1 day)
+                and date(t.create_time) &gt;= date_sub(curdate(), interval 7 day)
+            </if>
+        </where>
+        <if test="tab != 'hot'">
+            order by t.create_time desc
+        </if>
+        <if test="tab == 'hot'">
+            order t.create_time desc
+        </if>
+    </select>
+
+    <select id="selectListAndPageByTime" resultMap="OperationLog">
+        SELECT *
+        FROM oper_log
+        WHERE create_time Between #{startTime} And #{endTime}
+    </select>
+</mapper>

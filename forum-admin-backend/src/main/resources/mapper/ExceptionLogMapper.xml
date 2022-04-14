@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fengxi.forumadmin.mapper.ExceptionLogMapper">
+    <resultMap id="ExceptionLog" type="com.fengxi.forumadmin.model.entity.ExceptionLog">
+        <id column="id" property="id"/>
+        <result column="requ_param" property="ExcRequParam"/>
+        <result column="name" property="ExcName"/>
+        <result column="message" property="ExcMessage"/>
+        <result column="user_id" property="ExcUserId"/>
+        <result column="user_name" property="ExcUserName"/>
+        <result column="method" property="ExcMethod"/>
+        <result column="url" property="ExcUrl"/>
+        <result column="ip" property="ExcIp"/>
+        <result column="create_time" property="OperCreateTime"/>
+    </resultMap>
+
+    <select id="selectListAndPage" resultMap="ExceptionLog">
+        SELECT *
+        FROM exception_log t
+        <where>
+            <if test="tab == 'hot'">
+                date(t.create_time) &lt;= date_add(curdate(), interval 1 day)
+                and date(t.create_time) &gt;= date_sub(curdate(), interval 7 day)
+            </if>
+        </where>
+        <if test="tab != 'hot'">
+            order by t.create_time desc
+        </if>
+        <if test="tab == 'hot'">
+            order t.create_time desc
+        </if>
+    </select>
+
+    <select id="selectListAndPageByTime" resultMap="ExceptionLog">
+        SELECT *
+        FROM exception_log
+        WHERE create_time Between #{startTime} And #{endTime}
+    </select>
+</mapper>

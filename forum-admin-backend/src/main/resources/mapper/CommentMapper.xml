@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fengxi.forumadmin.mapper.CommentMapper">
+    <!-- 结构集映射，column是数据库中的列名，property是Java实体类中的字段名 -->
+    <resultMap id="CommentVO" type="com.fengxi.forumadmin.model.vo.CommentVO">
+        <id column="id" property="id"/>
+        <result column="content" property="content"/>
+        <result column="user_id" property="userId"/>
+        <result column="topic_id" property="topicId"/>
+        <result column="username" property="username"/>
+        <result column="create_time" property="createTime"/>
+        <result column="replyTo_id" property="replyToId"/>
+        <result column="parent_comment_id" property="parentId"/>
+    </resultMap>
+
+    <select id="getCommentsByTopicID" resultMap="CommentVO">
+        select *
+        where (topic_id = #{topicid}) and (parent_comment_id is null) and (is_pass == true )
+        order by create_time desc
+    </select>
+
+    <select id="selectNotAudited" resultMap="CommentVO">
+        SELECT*
+        FROM bms_comment t
+        <where>
+            t.is_audited = false
+            <if test="tab == 'hot'">
+                and date(t.create_time) &lt;= date_add(curdate(), interval 1 day)
+                and date(t.create_time) &gt;= date_sub(curdate(), interval 7 day)
+            </if>
+        </where>
+        <if test="tab != 'hot'">
+            order by t.create_time desc
+        </if>
+        <if test="tab == 'hot'">
+            order by t.view desc, t.create_time desc
+        </if>
+    </select>
+
+    <select id="getSecondLevelCommentsByParentID" resultMap="CommentVO">
+        select bms_comment.*,ums_user.username
+        from bms_comment
+                 join ums_user on ums_user.id = bms_comment.user_id
+        where (topic_id = #{topicId}) and (parent_comment_id = #{parentId})
+        order by create_time desc
+    </select>
+</mapper>
